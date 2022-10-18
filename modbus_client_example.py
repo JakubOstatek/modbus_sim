@@ -3,16 +3,16 @@
 
 An example of a single threaded synchronous client.
 
-usage: client_sync.py [-h] [--comm {tcp,udp,serial,tls}]
-                      [--framer {ascii,binary,rtu,socket,tls}]
+usage: client_sync.py [-h] [--comm {serial}]
+                      [--framer {ascii,binary,rtu}]
                       [--log {critical,error,warning,info,debug}]
                       [--port PORT]
 options:
   -h, --help            show this help message and exit
-  --comm {tcp,udp,serial,tls}
-                        "serial", "tcp", "udp" or "tls"
-  --framer {ascii,binary,rtu,socket,tls}
-                        "ascii", "binary", "rtu", "socket" or "tls"
+  --comm {serial}
+                        "serial"
+  --framer {ascii,binary,rtu}
+                        "ascii", "binary", "rtu"
   --log {critical,error,warning,info,debug}
                         "critical", "error", "warning", "info" or "debug"
   --port PORT           the port to use
@@ -29,16 +29,11 @@ import logging
 # --------------------------------------------------------------------------- #
 from pymodbus.client import (
     ModbusSerialClient,
-    ModbusTcpClient,
-    ModbusTlsClient,
-    ModbusUdpClient,
 )
 from pymodbus.transaction import (
     ModbusAsciiFramer,
     ModbusBinaryFramer,
     ModbusRtuFramer,
-    ModbusSocketFramer,
-    ModbusTlsFramer,
 )
 
 
@@ -46,78 +41,23 @@ def setup_sync_client(args=None):
     """Run client setup."""
     if not args:
         args = get_commandline()
-    if args.comm != "serial" and args.port:
-        args.port = int(args.port)
     _logger.info("### Create client object")
-    if args.comm == "tcp":
-        client = ModbusTcpClient(
-            "127.0.0.1",
-            port=args.port,
-            # Common optional paramers:
-            framer=args.framer,
-            #    timeout=10,
-            #    retries=3,
-            #    retry_on_empty=False,y
-            #    close_comm_on_error=False,
-            #    strict=True,
-            # TCP setup parameters
-            #    source_address=("localhost", 0),
-        )
-    elif args.comm == "udp":
-        client = ModbusUdpClient(
-            "localhost",
-            port=args.port,
-            # Common optional paramers:
-            framer=args.framer,
-            #    timeout=10,
-            #    retries=3,
-            #    retry_on_empty=False,
-            #    close_comm_on_error=False,
-            #    strict=True,
-            # UDP setup parameters
-            #    source_address=None,
-        )
-    elif args.comm == "serial":
+    if args.comm == "serial":
         client = ModbusSerialClient(
             port=args.port,  # serial port
             # Common optional paramers:
             #    framer=ModbusRtuFramer,
-            #    timeout=10,
+            timeout=3,
             #    retries=3,
             #    retry_on_empty=False,
             #    close_comm_on_error=False,.
             #    strict=True,
             # Serial setup parameters
-            #    baudrate=9600,
-            #    bytesize=8,
-            #    parity="N",
-            #    stopbits=1,
+            baudrate=9600,
+            bytesize=8,
+            # parity="N",
+            stopbits=1,
             #    handle_local_echo=False,
-        )
-    elif args.comm == "tls":
-        cwd = os.getcwd().split("/")[-1]
-        if cwd == "examples":
-            path = "."
-        elif cwd == "test":
-            path = "../examples"
-        else:
-            path = "examples"
-        client = ModbusTlsClient(
-            "localhost",
-            port=args.port,
-            # Common optional paramers:
-            framer=args.framer,
-            #    timeout=10,
-            #    retries=3,
-            #    retry_on_empty=False,
-            #    close_comm_on_error=False,
-            #    strict=True,
-            # TLS setup parameters
-            #    sslctx=None,
-            certfile=f"{path}/certificates/pymodbus.crt",
-            keyfile=f"{path}/certificates/pymodbus.key",
-            #    password=None,
-            server_hostname="localhost",
         )
     return client
 
@@ -133,15 +73,14 @@ def run_sync_client(client, modbus_calls=None):
     _logger.info("### End of Program")
 
 def commands_to_send(client: ModbusSerialClient):
-    client.write_coil(address=, value=True)
-    result = client.read_coils(1,1)
-    print(result)
+    # client.write_coil(address=20, value=True)
+    # result = client.read_coils(1,1)
+    # print(result)
     # client.write_coil(1, False)
     # result = client.read_coils(1,1)
     # print(result)
-
-    # result = client.read_holding_registers(222, 10, slave=1)
-    # print(result)
+    result = client.read_holding_registers(0, 10)
+    print(result)
 
 
 # --------------------------------------------------------------------------- #
@@ -159,14 +98,14 @@ def get_commandline():
     )
     parser.add_argument(
         "--comm",
-        choices=["tcp", "udp", "serial", "tls"],
-        help='"serial", "tcp", "udp" or "tls"',
+        choices=["serial"],
+        help='"serial"',
         type=str,
     )
     parser.add_argument(
         "--framer",
-        choices=["ascii", "binary", "rtu", "socket", "tls"],
-        help='"ascii", "binary", "rtu", "socket" or "tls"',
+        choices=["ascii", "binary", "rtu"],
+        help='"ascii", "binary", "rtu"',
         type=str,
     )
     parser.add_argument(
@@ -184,21 +123,16 @@ def get_commandline():
 
     # set defaults
     comm_defaults = {
-        "tcp": ["socket", 5020],
-        "udp": ["socket", 5020],
         "serial": ["rtu", "/dev/tnt1"],
-        "tls": ["tls", 5020],
     }
     framers = {
         "ascii": ModbusAsciiFramer,
         "binary": ModbusBinaryFramer,
         "rtu": ModbusRtuFramer,
-        "socket": ModbusSocketFramer,
-        "tls": ModbusTlsFramer,
     }
     _logger.setLevel(args.log.upper() if args.log else logging.INFO)
     if not args.comm:
-        args.comm = "tcp"
+        args.comm = "serial"
     if not args.framer:
         args.framer = comm_defaults[args.comm][0]
     args.port = args.port or comm_defaults[args.comm][1]
