@@ -3,7 +3,7 @@
 
 An example of a single threaded synchronous server.
 
-usage: server_sync.py [-h] [--comm {serial}]
+usage: server_sync.py [-h] [--comm {tcp,udp,serial,tls}]
                       [--framer {ascii,binary,rtu,socket,tls}]
                       [--log {critical,error,warning,info,debug}]
                       [--port PORT] [--store {sequential,sparse,factory,none}]
@@ -13,10 +13,10 @@ Command line options for examples
 
 options:
   -h, --help            show this help message and exit
-  --comm {serial}
-                        "serial"
-  --framer {ascii,binary,rtu}
-                        "ascii", "binary", "rtu"
+  --comm {tcp,udp,serial,tls}
+                        "serial", "tcp", "udp" or "tls"
+  --framer {ascii,binary,rtu,socket,tls}
+                        "ascii", "binary", "rtu", "socket" or "tls"
   --log {critical,error,warning,info,debug}
                         "critical", "error", "warning", "info" or "debug"
   --port PORT           the port to use
@@ -44,11 +44,16 @@ from pymodbus.device import ModbusDeviceIdentification
 # --------------------------------------------------------------------------- #
 from pymodbus.server import (
     StartSerialServer,
+    StartTcpServer,
+    StartTlsServer,
+    StartUdpServer,
 )
 from pymodbus.transaction import (
     ModbusAsciiFramer,
     ModbusBinaryFramer,
     ModbusRtuFramer,
+    ModbusSocketFramer,
+    ModbusTlsFramer,
 )
 from pymodbus.version import version
 
@@ -142,7 +147,43 @@ def run_sync_server(args=None):
     server_id, port, store, identity, framer = setup_sync_server(args)
     txt = f"### start server, listening on {port} - {server_id}"
     _logger.info(txt)
-    if server_id == "serial":
+    if server_id == "tcp":
+        address = ("", port) if port else None
+        server = StartTcpServer(
+            context=store,  # Data storage
+            identity=identity,  # server identify
+            # TBD host=
+            # TBD port=
+            address=address,  # listen address
+            # custom_functions=[],  # allow custom handling
+            framer=framer,  # The framer strategy to use
+            # TBD handler=None,  # handler for each session
+            allow_reuse_address=True,  # allow the reuse of an address
+            # ignore_missing_slaves=True,  # ignore request to a missing slave
+            # broadcast_enable=False,  # treat unit_id 0 as broadcast address,
+            # TBD timeout=1,  # waiting time for request to complete
+            # TBD strict=True,  # use strict timing, t1.5 for Modbus RTU
+            # defer_start=False,  # Only define server do not activate
+        )
+    elif server_id == "udp":
+        address = ("", port) if port else None
+        server = StartUdpServer(
+            context=store,  # Data storage
+            identity=identity,  # server identify
+            # TBD host=
+            # TBD port=
+            address=address,  # listen address
+            # custom_functions=[],  # allow custom handling
+            framer=framer,  # The framer strategy to use
+            # TBD handler=None,  # handler for each session
+            # TBD allow_reuse_address=True,  # allow the reuse of an address
+            # ignore_missing_slaves=True,  # ignore request to a missing slave
+            # broadcast_enable=False,  # treat unit_id 0 as broadcast address,
+            # TBD timeout=1,  # waiting time for request to complete
+            # TBD strict=True,  # use strict timing, t1.5 for Modbus RTU
+            # defer_start=False,  # Only define server do not activate
+        )
+    elif server_id == "serial":
         # socat -d -d PTY,link=/tmp/ptyp0,raw,echo=0,ispeed=9600
         #             PTY,link=/tmp/ttyp0,raw,echo=0,ospeed=9600
         server = StartSerialServer(
@@ -153,14 +194,44 @@ def run_sync_server(args=None):
             # custom_functions=[],  # allow custom handling
             framer=framer,  # The framer strategy to use
             # handler=None,  # handler for each session
-            stopbits=1,  # The number of stop bits to use
-            bytesize=8,  # The bytesize of the serial messages
-            # parity="O",  # Which kind of parity to use
-            baudrate=9600,  # The baud rate to use for the serial device
+            # stopbits=1,  # The number of stop bits to use
+            # bytesize=7,  # The bytesize of the serial messages
+            # parity="E",  # Which kind of parity to use
+            # baudrate=9600,  # The baud rate to use for the serial device
             # handle_local_echo=False,  # Handle local echo of the USB-to-RS485 adaptor
             # ignore_missing_slaves=True,  # ignore request to a missing slave
             # broadcast_enable=False,  # treat unit_id 0 as broadcast address,
             # strict=True,  # use strict timing, t1.5 for Modbus RTU
+            # defer_start=False,  # Only define server do not activate
+        )
+    elif server_id == "tls":
+        address = ("", port) if port else None
+        cwd = os.getcwd().split("/")[-1]
+        if cwd == "examples":
+            path = "."
+        elif cwd == "test":
+            path = "../examples"
+        else:
+            path = "examples"
+        server = StartTlsServer(
+            context=store,  # Data storage
+            host="localhost",  # define tcp address where to connect to.
+            # port=port,  # on which port
+            identity=identity,  # server identify
+            # custom_functions=[],  # allow custom handling
+            address=None,  # listen address
+            framer=framer,  # The framer strategy to use
+            # handler=None,  # handler for each session
+            allow_reuse_address=True,  # allow the reuse of an address
+            certfile=f"{path}/certificates/pymodbus.crt",  # The cert file path for TLS (used if sslctx is None)
+            # sslctx=None,  # The SSLContext to use for TLS (default None and auto create)
+            keyfile=f"{path}/certificates/pymodbus.key",  # The key file path for TLS (used if sslctx is None)
+            # password=None,  # The password for for decrypting the private key file
+            # reqclicert=False,  # Force the sever request client"s certificate
+            # ignore_missing_slaves=True,  # ignore request to a missing slave
+            # broadcast_enable=False,  # treat unit_id 0 as broadcast address,
+            # TBD timeout=1,  # waiting time for request to complete
+            # TBD strict=True,  # use strict timing, t1.5 for Modbus RTU
             # defer_start=False,  # Only define server do not activate
         )
     return server
@@ -179,14 +250,14 @@ def get_commandline():
     parser = argparse.ArgumentParser(description="Command line options for examples")
     parser.add_argument(
         "--comm",
-        choices=["serial"],
-        help='"serial"',
+        choices=["tcp", "udp", "serial", "tls"],
+        help='"serial", "tcp", "udp" or "tls"',
         type=str,
     )
     parser.add_argument(
         "--framer",
-        choices=["ascii", "binary", "rtu"],
-        help='"ascii", "binary", "rtu"',
+        choices=["ascii", "binary", "rtu", "socket", "tls"],
+        help='"ascii", "binary", "rtu", "socket" or "tls"',
         type=str,
     )
     parser.add_argument(
@@ -215,20 +286,25 @@ def get_commandline():
 
     # set defaults
     comm_defaults = {
-        "serial": ["rtu", "/dev/tnt0"],
+        "tcp": ["socket", 5020],
+        "udp": ["socket", 5020],
+        "serial": ["rtu", "/dev/ptyp0"],
+        "tls": ["tls", 5020],
     }
     framers = {
         "ascii": ModbusAsciiFramer,
         "binary": ModbusBinaryFramer,
         "rtu": ModbusRtuFramer,
+        "socket": ModbusSocketFramer,
+        "tls": ModbusTlsFramer,
     }
     _logger.setLevel(args.log.upper() if args.log else logging.INFO)
     if not args.comm:
-        args.comm = "serial"
+        args.comm = "tcp"
     if not args.store:
         args.store = "sequential"
     if not args.slaves:
-        args.slaves = 1
+        args.slaves = 0
     if not args.framer:
         args.framer = comm_defaults[args.comm][0]
     args.port = args.port or comm_defaults[args.comm][1]
@@ -239,3 +315,5 @@ def get_commandline():
 if __name__ == "__main__":
     server = run_sync_server()
     server.shutdown()
+
+

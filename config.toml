@@ -1,0 +1,17 @@
+# Simulation config file
+log_level = "debug"
+
+[client]
+port = "/dev/tnt1"
+baudrate = 9600
+bytesize = 8
+parity = "N"
+stopbits = 1
+handle_local_echo = false
+timeout = 10
+retries = 3
+retry_on_empty = false
+close_comm_on_error = false
+strict = true
+
+[server]

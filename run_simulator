@@ -1,0 +1,8 @@
+#!/bin/bash
+set -Eueo pipefail
+cd "$(dirname "$(readlink -f "$0")")"/..
+
+if [[ $1 == "server" ]]; then
+  echo "Running Modbus Server Script"
+  python3 modbus_server.py --comm serial --framer rtu --port /dev/tnt0 --log debug
+
