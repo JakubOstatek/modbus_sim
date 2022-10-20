@@ -26,9 +26,8 @@ from simulation_config import load_config
 
 def setup_sync_client():
     """Run client setup."""
-    config = load_config(CONFIG_PATH)
+    config = load_config(CONFIG_PATH).client
     _logger.setLevel(config.log_level.upper() if config.log_level else logging.INFO)
-    config = config.client
     _logger.info("### Create client object")
     client = ModbusSerialClient(
         framer=ModbusRtuFramer,
