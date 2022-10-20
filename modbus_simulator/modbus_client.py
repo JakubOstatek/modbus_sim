@@ -3,10 +3,9 @@
 
 import logging
 
-from config_loader import load_config
-from definitions import CONFIG_PATH
+from modbus_simulator.config_loader import load_config
+from modbus_simulator.definitions import CONFIG_PATH
 from pymodbus.client import ModbusSerialClient
-from pymodbus.client.base import ModbusBaseClient
 from pymodbus.transaction import ModbusRtuFramer
 
 
@@ -45,7 +44,7 @@ def run_sync_client(client, modbus_calls=False):
     _logger.info("### End of Program")
 
 
-def test_procedure(client: ModbusBaseClient):
+def test_procedure(client: ModbusSerialClient):
     # Check memory with coil requests
     for i in range(1, 50):
         client.write_register(i, 0)

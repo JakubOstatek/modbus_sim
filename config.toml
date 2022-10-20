@@ -1,5 +1,4 @@
 # Simulation config file
-
 [client]
 retry_on_empty = false
 close_comm_on_error = false
