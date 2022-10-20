@@ -9,26 +9,27 @@ from pymodbus.transaction import ModbusRtuFramer
 from pymodbus.client.base import ModbusBaseClient
 
 from definitions import CONFIG_PATH
-from simulation_config import load_config
+from config_loader import load_config
 
 def setup_sync_client():
     """Run client setup."""
     config = load_config(CONFIG_PATH).client
-    _logger.setLevel(config.log_level.upper() if config.log_level else logging.INFO)
+    _logger.setLevel(config.common.log_level.upper() if config.common.log_level else logging.INFO)
     _logger.info("### Create client object")
+    
     client = ModbusSerialClient(
         framer=ModbusRtuFramer,
-        port=config.port,
-        timeout=config.timeout,
+        port=config.common.port,
+        baudrate=config.common.baudrate,
+        bytesize=config.common.bytesize,
+        parity=config.common.parity,
+        stopbits=config.common.stopbits,
+        timeout=config.common.timeout,
+        handle_local_echo=config.common.handle_local_echo,
+        strict=config.common.strict,
         retries=config.retries,
         retry_on_empty=config.retry_on_empty,
         close_comm_on_error=config.close_comm_on_error,
-        strict=config.strict,
-        baudrate=config.baudrate,
-        bytesize=config.bytesize,
-        parity=config.parity,
-        stopbits=config.stopbits,
-        handle_local_echo=config.handle_local_echo,
     )
     return client
 

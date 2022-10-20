@@ -12,7 +12,7 @@ from pymodbus.server import StartSerialServer
 from pymodbus.transaction import ModbusRtuFramer
 
 from definitions import CONFIG_PATH
-from simulation_config import load_config, ServerParameters
+from config_loader import load_config, ServerParameters
 
 def setup_sync_server(config: ServerParameters):
     """Run server setup."""
@@ -59,28 +59,25 @@ def setup_sync_server(config: ServerParameters):
 def run_sync_server():
     """Run server."""
     config = load_config(CONFIG_PATH).server
-    _logger.setLevel(config.log_level.upper() if config.log_level else logging.INFO)
+    _logger.setLevel(config.common.log_level.upper() if config.common.log_level else logging.INFO)
 
     store = setup_sync_server(config)
-    txt = f"### start server, listening on {config.port} - serial"
+    txt = f"### start server, listening on {config.common.port} - serial"
     _logger.info(txt)
 
     server = StartSerialServer(
         context=store,  # Data storage
-        # identity=identity,  # server identify
         framer= ModbusRtuFramer,  # The framer strategy to use
-        port=config.port,  # serial port
-        timeout=config.timeout,  # waiting time for request to complete
-        # custom_functions=[],  # allow custom handling
-        # handler=None,  # handler for each session
-        stopbits=config.stopbits,  # The number of stop bits to use
-        bytesize=config.bytesize,  # The bytesize of the serial messages
-        parity=config.parity,  # Which kind of parity to use
-        baudrate=config.baudrate,  # The baud rate to use for the serial device
-        handle_local_echo=config.handle_local_echo,  # Handle local echo of the USB-to-RS485 adaptor
+        port=config.common.port,  # serial port
+        baudrate=config.common.baudrate,  # The baud rate to use for the serial device
+        bytesize=config.common.bytesize,  # The bytesize of the serial messages
+        parity=config.common.parity,  # Which kind of parity to use
+        stopbits=config.common.stopbits,  # The number of stop bits to use
+        timeout=config.common.timeout,  # waiting time for request to complete
+        handle_local_echo=config.common.handle_local_echo,  # Handle local echo of the USB-to-RS485 adaptor
+        strict=config.common.strict,  # use strict timing, t1.5 for Modbus RTU
         ignore_missing_slaves=config.ignore_missing_slaves,  # ignore request to a missing slave
         broadcast_enable=config.broadcast_enable,  # treat unit_id 0 as broadcast address,
-        strict=config.strict,  # use strict timing, t1.5 for Modbus RTU
         defer_start=config.defer_start,  # Only define server do not activate
         )
     return server

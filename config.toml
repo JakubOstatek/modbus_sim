@@ -1,31 +1,35 @@
 # Simulation config file
 
 [client]
+retry_on_empty = false
+close_comm_on_error = false
+retries = 3
+
+[client.common]
 log_level = "debug"
 port = "/dev/tnt1"
 baudrate = 9600
 bytesize = 8
 parity = "N"
 stopbits = 1
-handle_local_echo = false
 timeout = 10
-retries = 3
-retry_on_empty = false
-close_comm_on_error = false
+handle_local_echo = false
 strict = true
 
 [server]
-log_level = "debug"
-port = "/dev/tnt0"
 store = "sequential"
-slaves = 0
-timeout = 0.005
-stopbits = 1
-bytesize = 8
-parity = "N"
-baudrate = 9600
-handle_local_echo = false  # Handle local echo of the USB-to-RS485 adaptor
 ignore_missing_slaves = true  # ignore request to a missing slave
 broadcast_enable = false  # treat unit_id 0 as broadcast address,
-strict = true  # use strict timing, t1.5 for Modbus RTU
 defer_start = false  # Only define server do not activate
+slaves = 0
+
+[server.common]
+log_level = "debug"
+port = "/dev/tnt0"
+baudrate = 9600
+bytesize = 8
+parity = "N"
+stopbits = 1
+timeout = 0.005
+handle_local_echo = false  # Handle local echo of the USB-to-RS485 adaptor
+strict = true  # use strict timing, t1.5 for Modbus RTU

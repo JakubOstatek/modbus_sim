@@ -18,9 +18,9 @@ class CommonParameters:
     bytesize: int
     parity: str
     stopbits: int
+    timeout: float 
     handle_local_echo: bool
     strict: bool
-    timeout: int
 
 @dataclass
 class ClientParameters:
