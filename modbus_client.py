@@ -1,19 +1,6 @@
 #!/usr/bin/env python3
-"""Pymodbus Synchronous Client.
-hardcode:   comm - serial
-            framer - rtu
-to choose:  log, port, transfer parameters eg. baudrate 
+"""Pymodbus Synchronous Client"""
 
-usage: client_sync.py [-h] 
-                      [--log {critical,error,warning,info,debug}]
-                      [--port PORT]
-options:
-  -h, --help            show this help message and exit
-  --log {critical,error,warning,info,debug}
-                        "critical", "error", "warning", "info" or "debug"
-  --port PORT           the port to use
-"""
-import argparse
 import logging
 
 from pymodbus.client import ModbusSerialClient
@@ -37,7 +24,6 @@ def setup_sync_client():
         retry_on_empty=config.retry_on_empty,
         close_comm_on_error=config.close_comm_on_error,
         strict=config.strict,
-        # Serial setup parameters
         baudrate=config.baudrate,
         bytesize=config.bytesize,
         parity=config.parity,
@@ -58,7 +44,6 @@ def run_sync_client(client, modbus_calls=False):
 
 
 def test_procedure(client : ModbusBaseClient):
-    space = "----------------------------------------------"
     # Check memory with coil requests
     for i in range(1,50):
         client.write_register(i, 0)

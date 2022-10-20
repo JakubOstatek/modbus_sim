@@ -1,13 +1,5 @@
 #!/usr/bin/env python3
-"""Pymodbus Synchronous Server
-
-                      [--log {critical,error,warning,info,debug}]
-                      [--port PORT]
-                      [--store {sequential,sparse,factory,none}]
-                      [--slaves SLAVES]
-"""
-import argparse
-import os
+"""Pymodbus Synchronous Server"""
 import logging
 
 from pymodbus.datastore import (
@@ -16,11 +8,8 @@ from pymodbus.datastore import (
     ModbusSlaveContext,
     ModbusSparseDataBlock,
 )
-from pymodbus.device import ModbusDeviceIdentification
-
 from pymodbus.server import StartSerialServer
 from pymodbus.transaction import ModbusRtuFramer
-from pymodbus.version import version
 
 from definitions import CONFIG_PATH
 from simulation_config import load_config, ServerParameters
