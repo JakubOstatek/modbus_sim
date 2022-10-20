@@ -8,8 +8,11 @@ authors = ["jakubostatek <j.ostatek@satrevolution.com>"]
 python = "^3.10"
 dacite = "^1.6.0"
 toml = "^0.10.2"
-pyserial = "^3.5"
-pyserial_asyncio = "^0.6"
+pyserial = "3.5"
+pyserial-asyncio = "0.6"
+async-timeout = "^4.0.2"
+pymodbus = {git = "https://github.com/riptideio/pymodbus.git", branch = "dev", rev = "7e58d51d", extras = ["development"]}
+
 
 [tool.poetry.dev-dependencies]
 taskipy = "^1.10.1"
@@ -20,7 +23,6 @@ black = "^22.3.0"
 isort = "^5.10.1"
 mypy = "^0.942"
 pylint = "^2.13.4"
-coverage = "^6.3.2"
 pytest = "^7.1.1"
 
 [build-system]
@@ -41,11 +43,7 @@ test_package = "tests"
 [tool.taskipy.tasks]
 test = "task test_unit"
 test_unit = """
-    python -m pytest \
-        -o junit_family=xunit2 \
-        --junitxml=.tests_result.xml \
-        -vv \
-        {test_package}
+    python -m pytest {test_package}
 """
 
 lint = "task lint_flake8 && task lint_mypy && task lint_bandit && task lint_pylint"

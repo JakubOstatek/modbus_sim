@@ -3,20 +3,21 @@
 
 import logging
 
+from config_loader import load_config
+from definitions import CONFIG_PATH
 from pymodbus.client import ModbusSerialClient
+from pymodbus.client.base import ModbusBaseClient
 from pymodbus.transaction import ModbusRtuFramer
 
-from pymodbus.client.base import ModbusBaseClient
-
-from definitions import CONFIG_PATH
-from config_loader import load_config
 
 def setup_sync_client():
     """Run client setup."""
     config = load_config(CONFIG_PATH).client
-    _logger.setLevel(config.common.log_level.upper() if config.common.log_level else logging.INFO)
+    _logger.setLevel(
+        config.common.log_level.upper() if config.common.log_level else logging.INFO
+    )
     _logger.info("### Create client object")
-    
+
     client = ModbusSerialClient(
         framer=ModbusRtuFramer,
         port=config.common.port,
@@ -44,12 +45,12 @@ def run_sync_client(client, modbus_calls=False):
     _logger.info("### End of Program")
 
 
-def test_procedure(client : ModbusBaseClient):
+def test_procedure(client: ModbusBaseClient):
     # Check memory with coil requests
-    for i in range(1,50):
+    for i in range(1, 50):
         client.write_register(i, 0)
     # _logger.info(space)
-    response = client.read_holding_registers(0,99)
+    response = client.read_holding_registers(0, 99)
     print(response)
     # sleep(1)
 
