@@ -39,7 +39,7 @@ main_package = "modbus_simulator"
 test_package = "tests"
 
 [tool.taskipy.tasks]
-test = "task generate_proto && task test_unit && task test_coverage && task test_report"
+test = "task test_unit"
 test_unit = """
     python -m pytest \
         -o junit_family=xunit2 \
@@ -47,13 +47,8 @@ test_unit = """
         -vv \
         {test_package}
 """
-test_coverage="""
-    coverage run \
-    -m pytest {test_package}
-"""
-test_report="coverage report -m && coverage xml"
 
-lint = "task generate_proto && task lint_flake8 && task lint_mypy && task lint_bandit && task lint_pylint"
+lint = "task lint_flake8 && task lint_mypy && task lint_bandit && task lint_pylint"
 lint_pylint = "pylint --load-plugins pylint_pytest {test_package} {main_package}"
 lint_mypy = "python -m mypy --namespace-packages -p {main_package}"
 lint_bandit = "python -m bandit -r {main_package}"
@@ -65,5 +60,5 @@ format_isort = "isort --profile black {main_package} {test_package}"
 
 check_all = "task format && task lint && task test"
 
-start_server = "python modbus_server.py"
-start_client = "python modbus_client.py"
+start_server = "python modbus_simulator/modbus_server.py"
+start_client = "python modbus_simulator/modbus_client.py"
