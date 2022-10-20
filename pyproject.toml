@@ -1,0 +1,69 @@
+[tool.poetry]
+name = "modbus_simulator"
+version = "0.1.0"
+description = "For modbus communication testing purpose"
+authors = ["jakubostatek <j.ostatek@satrevolution.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+dacite = "^1.6.0"
+toml = "^0.10.2"
+pyserial = "^3.5"
+pyserial_asyncio = "^0.6"
+
+[tool.poetry.dev-dependencies]
+taskipy = "^1.10.1"
+bandit = "^1.7.4"
+flake8 = "^4.0.1"
+pyproject-flake8 = "^0.0.1a4"
+black = "^22.3.0"
+isort = "^5.10.1"
+mypy = "^0.942"
+pylint = "^2.13.4"
+coverage = "^6.3.2"
+pytest = "^7.1.1"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+# ----------------------------------------------------------------
+#   Taskipy
+# ----------------------------------------------------------------
+
+[tool.taskipy.settings]
+use_vars = true
+
+[tool.taskipy.variables]
+main_package = "modbus_simulator"
+test_package = "tests"
+
+[tool.taskipy.tasks]
+test = "task generate_proto && task test_unit && task test_coverage && task test_report"
+test_unit = """
+    python -m pytest \
+        -o junit_family=xunit2 \
+        --junitxml=.tests_result.xml \
+        -vv \
+        {test_package}
+"""
+test_coverage="""
+    coverage run \
+    -m pytest {test_package}
+"""
+test_report="coverage report -m && coverage xml"
+
+lint = "task generate_proto && task lint_flake8 && task lint_mypy && task lint_bandit && task lint_pylint"
+lint_pylint = "pylint --load-plugins pylint_pytest {test_package} {main_package}"
+lint_mypy = "python -m mypy --namespace-packages -p {main_package}"
+lint_bandit = "python -m bandit -r {main_package}"
+lint_flake8 = "poetry run python -m pflake8 {main_package} {test_package} && echo Everything is Correct"
+
+format = "task format_black && task format_isort"
+format_black = "black {main_package} {test_package}"
+format_isort = "isort --profile black {main_package} {test_package}"
+
+check_all = "task format && task lint && task test"
+
+start_server = "python modbus_server.py"
+start_client = "python modbus_client.py"
