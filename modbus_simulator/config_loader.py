@@ -10,8 +10,7 @@ log = logging.getLogger(__name__)
 
 
 @dataclass
-class CommonParameters:
-    log_level: str
+class ModbusClientConfig:
     port: str
     baudrate: int
     bytesize: int
@@ -20,36 +19,15 @@ class CommonParameters:
     timeout: float
     handle_local_echo: bool
     strict: bool
-
-
-@dataclass
-class ClientParameters:
-    common: CommonParameters
     retries: int
     retry_on_empty: bool
     close_comm_on_error: bool
 
 
-@dataclass
-class ServerParameters:
-    common: CommonParameters
-    store: str
-    slaves: int
-    ignore_missing_slaves: bool
-    broadcast_enable: bool
-    defer_start: bool
-
-
-@dataclass
-class ModbusSimulationConfig:
-    client: ClientParameters
-    server: ServerParameters
-
-
-def load_config(config_path: Path) -> ModbusSimulationConfig:
+def load_config(config_path: Path) -> ModbusClientConfig:
     log.info("Loading config...")
     config = from_dict(
-        data_class=ModbusSimulationConfig,
+        data_class=ModbusClientConfig,
         data=toml.load(config_path),
         config=Config(cast=[Path]),
     )

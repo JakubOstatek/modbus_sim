@@ -32,7 +32,6 @@ build-backend = "poetry.core.masonry.api"
 # ----------------------------------------------------------------
 #   Taskipy
 # ----------------------------------------------------------------
-
 [tool.taskipy.settings]
 use_vars = true
 
@@ -57,9 +56,6 @@ format_black = "black {main_package} {test_package}"
 format_isort = "isort --profile black {main_package} {test_package}"
 
 check_all = "task format && task lint && task test"
-
-start_server = "python modbus_simulator/modbus_server.py"
-start_client = "python modbus_simulator/modbus_client.py"
 
 [tool.pytest.ini_options]
 log_cli = true

@@ -31,4 +31,3 @@ def test_request_read_register(client, connection):
     # Read holding registers request
     response = client.read_holding_registers(0, 101)
     print(response)
-    
