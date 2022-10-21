@@ -19,7 +19,7 @@ def connection(client):
     """Attempt to connect with the slave at the start.
     Then assert if connection was established correctly.
     Finally close connection at the end of test case that use this fixture"""
-    assert client.connect() == True
+    assert client.connect()
     log.info("Connected to serial port")
     yield
     if client.socket:
@@ -27,7 +27,8 @@ def connection(client):
         log.info("Closed serial connection")
     else:
         log.info(
-            "Probably connection closed with unknown reason during execute of the test logic"
+            "Connection closed with unknown reason \
+            during execution of test logic"
         )
 
 

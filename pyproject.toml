@@ -3,15 +3,19 @@ name = "modbus_simulator"
 version = "0.1.0"
 description = "For modbus communication testing purpose"
 authors = ["jakubostatek <j.ostatek@satrevolution.com>"]
+
+# ----------------------------------------------------------------
+#   Dependencies
+# ----------------------------------------------------------------
+
 [tool.poetry.dependencies]
 python = "^3.10"
 dacite = "^1.6.0"
 toml = "^0.10.2"
 pyserial = "3.5"
 pyserial-asyncio = "0.6"
-async-timeout = "^4.0.2"
 pymodbus = {git = "https://github.com/riptideio/pymodbus.git", branch = "dev", rev = "7e58d51d", extras = ["development"]}
-
+types-toml = "^0.10.8"
 
 [tool.poetry.dev-dependencies]
 taskipy = "^1.10.1"
@@ -21,8 +25,9 @@ pyproject-flake8 = "^0.0.1a4"
 black = "^22.3.0"
 isort = "^5.10.1"
 mypy = "^0.942"
-pylint = "^2.13.4"
 pytest = "^7.1.1"
+pylint = "^2.13.4"
+pylint_pytest = "^1.0.0"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
@@ -31,6 +36,7 @@ build-backend = "poetry.core.masonry.api"
 # ----------------------------------------------------------------
 #   Taskipy
 # ----------------------------------------------------------------
+
 [tool.taskipy.settings]
 use_vars = true
 
@@ -56,8 +62,37 @@ format_isort = "isort --profile black {main_package} {test_package}"
 
 check_all = "task format && task lint && task test"
 
+# ----------------------------------------------------------------
+#   Pytest
+# ----------------------------------------------------------------
+
 [tool.pytest.ini_options]
 log_cli = true
 log_cli_level = "DEBUG"
 log_cli_format = "%(asctime)s [%(levelname)8s] %(message)s (%(filename)s:%(lineno)s)"
 log_cli_date_format = "%Y-%m-%d %H:%M:%S"
+
+# ----------------------------------------------------------------
+#   MyPy
+# ----------------------------------------------------------------
+
+[tool.mypy]
+strict = true
+
+[[tool.mypy.overrides]]
+module = 'pymodbus.*'
+ignore_missing_imports = true
+
+# ----------------------------------------------------------------
+#   Pylint
+# ----------------------------------------------------------------
+
+[tool.pylint.master]
+fail-under = 9.0
+
+[tool.pylint.messages_control]
+disable = [
+  "missing-docstring",
+  "line-too-long",
+  "too-many-instance-attributes",
+]
