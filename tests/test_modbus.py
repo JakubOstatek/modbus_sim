@@ -7,27 +7,26 @@ from pymodbus.client import ModbusSerialClient
 
 log = logging.getLogger(__name__)
 
-def test_of_tests():
-    assert True == True
 
 @pytest.fixture(scope="session")
 def client() -> ModbusSerialClient:
+    """Setups client for tests session"""
     return modbus_client.setup_sync_client()
 
 @pytest.fixture(scope="function")
 def connection(client):
-    client.connect()
-    log.info("Connected to server")
+    """Attempt to connect with the slave at the start.
+    Then assert if connection was established correctly.
+    Finally close connection at the end of test case that use this fixture"""
+    assert client.connect() == True
+    log.info("Connected to serial port")
     yield
-    client.close()
-    log.info("Disconnected from server")
+    if client.socket:
+        client.close()
+        log.info("Closed serial connection")
+    else:
+        log.info("Probably connection closed with unknown reason during execute of the test logic")
 
 
-def test_request_read_register(client, connection):
-    # Write register requests - no response needed
-    for i in range(1, 50):
-        client.write_register(i, 0)
-
-    # Read holding registers request
-    response = client.read_holding_registers(0, 101)
-    print(response)
+def test():
+    return True
