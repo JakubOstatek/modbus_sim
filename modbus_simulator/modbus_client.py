@@ -1,9 +1,10 @@
 """Pymodbus Synchronous Client"""
 
-from modbus_simulator.config_loader import load_config
-from modbus_simulator.definitions import CONFIG_PATH
 from pymodbus.client import ModbusSerialClient
 from pymodbus.transaction import ModbusRtuFramer
+
+from modbus_simulator.config_loader import load_config
+from modbus_simulator.definitions import CONFIG_PATH
 
 
 def setup_sync_client() -> ModbusSerialClient:

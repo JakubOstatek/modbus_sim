@@ -1,9 +1,9 @@
-import pytest
 import logging
 
-from modbus_simulator import modbus_client
+import pytest
 from pymodbus.client import ModbusSerialClient
 
+from modbus_simulator import modbus_client
 
 log = logging.getLogger(__name__)
 
@@ -12,6 +12,7 @@ log = logging.getLogger(__name__)
 def client() -> ModbusSerialClient:
     """Setups client for tests session"""
     return modbus_client.setup_sync_client()
+
 
 @pytest.fixture(scope="function")
 def connection(client):
@@ -25,7 +26,9 @@ def connection(client):
         client.close()
         log.info("Closed serial connection")
     else:
-        log.info("Probably connection closed with unknown reason during execute of the test logic")
+        log.info(
+            "Probably connection closed with unknown reason during execute of the test logic"
+        )
 
 
 def test():
