@@ -7,6 +7,8 @@ from modbus_simulator.config_loader import load_config
 from modbus_simulator.definitions import CONFIG_PATH
 from pymodbus.client import ModbusSerialClient
 from pymodbus.transaction import ModbusRtuFramer
+from pymodbus.payload import BinaryPayloadBuilder, BinaryPayloadDecoder
+from pymodbus.constants import Endian
 
 
 def setup_sync_client():
@@ -46,11 +48,18 @@ def run_sync_client(client, modbus_calls=False):
 
 def test_procedure(client: ModbusSerialClient):
     # Check memory with coil requests
-    for i in range(1, 50):
-        client.write_register(i, 0)
+    builder = BinaryPayloadBuilder(byteorder=Endian.Big, wordorder=Endian.Little)
+    builder.add_16bit_uint(17)
+    # builder.add_32bit_float(77.77)
+    payload = builder.to_registers()
+    print(payload)
+    # resp = client.write_registers(10, payload, slave=42)
+    response = client.read_holding_registers(101, 1, slave=42)
+    decoder = BinaryPayloadDecoder.fromRegisters(response.registers, Endian.Big, wordorder=Endian.Little)
     # _logger.info(space)
-    response = client.read_holding_registers(0, 99)
-    print(response)
+    # response = client.read_holding_registers(0, 99)
+    # print(response)
+    # print(response.registers)
     # sleep(1)
 
 
